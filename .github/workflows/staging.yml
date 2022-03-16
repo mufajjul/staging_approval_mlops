@@ -51,6 +51,6 @@ jobs:
       with:
         azcliversion: 2.30.0
         inlineScript: |
-          az ml model update  --name demo-model --version 2 --set tags.staging=prod  --resource-group mlstudio --workspace aml-cust-demo
+          az ml model update  --name demo-model --version 2 --set tags.staging=prod  --resource-group mlstudio --workspace-name aml-cust-demo
 
        
