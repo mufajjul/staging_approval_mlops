@@ -44,7 +44,7 @@ jobs:
         inlineScript: |
           az account show
           az storage -h
-          az extension remove -n azure-cli-ml
+          #az extension remove -n azure-cli-ml
           az extension add -n ml -y
           az ml -h
   
