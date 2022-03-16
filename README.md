@@ -1,5 +1,5 @@
 ## ML Ops with GitHub Actions and Azure Machine Learning
-dd
+d
 ds
 
 <p align="center">
