@@ -6,8 +6,7 @@ name: staging and approval
 # or API.
 on:
   pull_request:
-    types: [assigned,closed, review_requested] 
-
+    types: [assigned, unassigned, labeled, unlabeled, opened, edited, closed, reopened, synchronize, converted_to_draft, ready_for_review, locked, unlocked]
 
 #  workflow_dispatch:
     # Inputs the workflow accepts.
