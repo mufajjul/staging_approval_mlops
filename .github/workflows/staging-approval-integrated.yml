@@ -6,7 +6,7 @@ name: staging and approval hosted
 # or API.
 on:
   pull_request:
-    types: [assigned, unassigned, labeled, unlabeled, opened, edited, closed, reopened, synchronize, converted_to_draft, ready_for_review, locked, unlocked]
+    types: [ closed]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -45,7 +45,7 @@ jobs:
     name: Deploy to staging
     environment:
         name: staging
-        #url: ${{ steps.deploy_staging.outputs.webapp-url }}
+        url: ${{ steps.deploy_staging.outputs.webapp-url }}
     runs-on: ubuntu-latest
     steps:
       - name: Azure Login
@@ -70,7 +70,7 @@ jobs:
     needs: staging
     environment:
       name: production
-      #url: ${{ steps.deploy_production.outputs.webapp-url }}
+      url: ${{ steps.deploy_production.outputs.webapp-url }}
     name: Deploy to production
     runs-on: ubuntu-latest
     steps:
