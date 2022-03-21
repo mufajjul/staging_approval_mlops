@@ -1,0 +1,109 @@
+# 
+
+name: staging and approval components workflow
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  pull_request:
+    types: [ closed]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "greet"
+
+  build:
+  
+    name: Build
+    #if: github.event_name == 'push' && contains(toJson(github.event.commits), '***NO_CI***') == false && contains(toJson(github.event.commits), '[ci skip]') == false && contains(toJson(github.event.commits), '[skip ci]') == false
+    runs-on: ubuntu-latest
+    steps:
+    # Runs a single command using the runners shell
+    - name: Send greeting
+      run: echo "Hello ${{ github.event.inputs.name }}"
+      
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Run components
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          az account show
+          az storage -h
+          #az extension remove -n azure-cli-ml
+          az extension add -n ml -y
+          az ml -h
+          
+          az ml job create -f ./pipeline.yml 
+          
+          
+    - name: Register model staging as None and Approval as None
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          az account show
+          az storage -h
+          #az extension remove -n azure-cli-ml
+          az extension add -n ml -y
+          az ml -h
+                    
+          az ml model update  --name demo-model --version 2 --set tags.staging=none  --resource-group mlstudio --workspace-name aml-cust-demo
+          az ml model update  --name demo-model --version 2 --set tags.approval=none  --resource-group mlstudio --workspace-name aml-cust-demo
+               
+  staging:
+    needs: build
+    name: Deploy to staging
+    environment:
+        name: staging
+        #url: ${{ steps.deploy_staging.outputs.webapp-url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.30.0
+          inlineScript: |
+            az account show
+            az storage -h
+            #az extension remove -n azure-cli-ml
+            az extension add -n ml -y
+            az ml -h
+            az ml model update  --name demo-model --version 2 --set tags.staging=staging  --resource-group mlstudio --workspace-name aml-cust-demo
+            az ml model update  --name demo-model --version 2 --set tags.approval=approved  --resource-group mlstudio --workspace-name aml-cust-demo
+  deploy:
+    needs: staging
+    environment:
+      name: production
+      #url: ${{ steps.deploy_production.outputs.webapp-url }}
+    name: Deploy to production
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Azure CLI script
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          az account show
+          az storage -h
+          #az extension remove -n azure-cli-ml
+          az extension add -n ml -y
+          az ml -h
+          az ml model update  --name demo-model --version 2 --set tags.staging=prod  --resource-group mlstudio --workspace-name aml-cust-demo
+          az ml model update  --name demo-model --version 2 --set tags.approval=approved  --resource-group mlstudio --workspace-name aml-cust-demo
