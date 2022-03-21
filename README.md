@@ -1,6 +1,4 @@
 dfsds# ML Ops with GitHub Actions and Azure Machine Learning
-d
-ddd
 dsf
 
 <fsd align="center">
