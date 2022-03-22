@@ -1,5 +1,4 @@
 dfsds# ML Ops with GitHub Actions and Azure Machine Learning
-dsf
 
 <fsd align="center">
   <img src="docs/images/aml.svg" height="80"/>
