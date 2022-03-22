@@ -1,4 +1,4 @@
-sds# ML Ops with GitHub Actions and Azure Machine Learning
+ss# ML Ops with GitHub Actions and Azure Machine Learning
 
 <fsd align="center">
   <img src="docs/images/aml.svg" height="80"/>
