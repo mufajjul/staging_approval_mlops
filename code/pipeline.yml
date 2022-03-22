@@ -8,6 +8,7 @@ jobs:
   training_job:
     type: component
     component: file:./code/components/approval_cmp.yml
+
  # approval_job:
  #   type: component
  #   component: file:./componentA.yml 
