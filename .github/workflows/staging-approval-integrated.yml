@@ -17,17 +17,13 @@ jobs:
     name: Build
     #if: github.event_name == 'push' && contains(toJson(github.event.commits), '***NO_CI***') == false && contains(toJson(github.event.commits), '[ci skip]') == false && contains(toJson(github.event.commits), '[skip ci]') == false
     runs-on: ubuntu-latest
-    steps:
-    # Runs a single command using the runners shell
-    - name: Send greeting
-      run: echo "Hello ${{ github.event.inputs.name }}"
-      
+    steps:      
     - name: Azure Login
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Azure CLI script
+    - name: AML CLI update model staging/Approval to None
       uses: azure/CLI@v1
       with:
         azcliversion: 2.30.0
@@ -54,7 +50,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Azure CLI script
+      - name: AML CLI update model stage to staging if approved 
         uses: azure/CLI@v1
         with:
           azcliversion: 2.30.0
@@ -81,7 +77,7 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
-    - name: Azure CLI script
+    - name: AML CLI update model stage to staging if approved 
       uses: azure/CLI@v1
       with:
         azcliversion: 2.30.0
