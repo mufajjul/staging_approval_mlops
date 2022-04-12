@@ -5,8 +5,7 @@ name: build_ml_model
 display_name: buildModel
 version: 1
 
-code:
-  local_path: ./build_cmp
+code: ./build_cmp
 
 environment: 
   conda_file: ./build_cmp/environment.yml
