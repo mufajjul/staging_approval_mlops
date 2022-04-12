@@ -1,0 +1,50 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+description: "Staging and approval, build process"
+
+compute: azureml:cpucluster
+
+jobs:
+  build_job:
+    type: component
+    #component: file:./components/approval_cmp.yml
+    component: file:./components/build_cmp.yml
+
+#  register_model:
+#    command: az ml az ml model create --file outputs/model.yml --resource-group mlstudio --workspace-name aml-cust-demo
+#    environment:
+      #conda_file: ./build_cmp/environment.yml
+#      image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.0.3-cudnn8-ubuntu18.04:20210405.v1 
+  
+#  register_model_stage:
+#    command: az ml model update  --name demo-model --version 2 --set tags.staging=none  --resource-group mlstudio --workspace-name aml-cust-demo
+#    environment:
+      #conda_file: ./build_cmp/environment.yml
+#      image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.0.3-cudnn8-ubuntu18.04:20210405.v1 
+    
+#  register_approval_stage:
+#    command: az ml model update  --name demo-model --version 2 --set tags.approval=none  --resource-group mlstudio --workspace-name aml-cust-demo
+#    environment:
+      #conda_file: ./build_cmp/environment.yml
+#      image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.0.3-cudnn8-ubuntu18.04:20210405.v1 
+
+
+#  test_job:
+#    type: component
+    #component: file:./components/approval_cmp.yml
+#    component: file:./components/test_cmp.yml
+
+#  deploy_job:
+#    type: component
+    #component: file:./components/approval_cmp.yml
+#    component: file:./components/deploy_cmp.yml
+
+ # approval_job:
+ #   type: component
+ #   component: file:./componentA.yml 
+ # test_job:
+ #   type: component
+ #   component: file:./componentB.yml
+ # deploy_job:
+ #   type: component
+ #   component: file:./componentC.yml
