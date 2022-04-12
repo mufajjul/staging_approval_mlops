@@ -69,6 +69,20 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    
+      - name: Azure CLI Train Model 
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.30.0
+          inlineScript: |
+            az account show
+            az storage -h
+            #az extension remove -n azure-cli-ml
+            az extension add -n ml -y
+            az ml -h
+            az ml job --file ./code/build_pipeline.yml --strean
+ 
 
       - name: Azure CLI script
         uses: azure/CLI@v1
