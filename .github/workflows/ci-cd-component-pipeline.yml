@@ -6,9 +6,8 @@ name: staging and approval components workflow P&G
 on:
   pull_request:
     types: [ closed]
-  
-  paths:
-  - cli/setup.sh
+    paths:
+    - cli/setup.sh
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
