@@ -35,10 +35,10 @@ jobs:
       working-directory: ./code
           
     - name: Register model staging as None
-      run: az ml model update  --name iris_model --version 2 --set tags.staging=none  --resource-group mlstudio --workspace-name aml-cust-demo
+      run: az ml model update  --name iris_model --label=latest  --set tags.staging=none  --resource-group mlstudio --workspace-name aml-cust-demo
 
     - name: Register model approval (stage:none) to none
-      run: az ml model update  --name iris_model --version 2 --set tags.approval=none  --resource-group mlstudio --workspace-name aml-cust-demo
+      run: az ml model update  --name iris_model --label=latest  --set tags.approval=none  --resource-group mlstudio --workspace-name aml-cust-demo
                
   staging:
     needs: build
