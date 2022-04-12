@@ -1,8 +1,5 @@
 
 name: staging and approval components workflow P&G
-
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
 on:
   pull_request:
     types: [ closed]
@@ -12,14 +9,13 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "greet"
-
   build:
-  
     name: Build
     #if: github.event_name == 'push' && contains(toJson(github.event.commits), '***NO_CI***') == false && contains(toJson(github.event.commits), '[ci skip]') == false && contains(toJson(github.event.commits), '[skip ci]') == false
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    
     # Runs a single command using the runners shell
     - name: Send greeting
       run: echo "Hello ${{ github.event.inputs.name }}"
