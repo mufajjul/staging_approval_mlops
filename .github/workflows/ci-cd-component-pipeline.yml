@@ -31,14 +31,14 @@ jobs:
       continue-on-error: true
     
     - name: CI (build and register mode)
-      run: az ml job create -f ./code/pipeline.yml --resource-group mlstudio --workspace-name aml-cust-demo --stream
+      run: az ml job create -f ./code/build_pipeline.yml --resource-group mlstudio --workspace-name aml-cust-demo --stream
       #working-directory: cli
           
     - name: Register model staging as None
-      run: az ml model update  --name demo-model --version 2 --set tags.staging=none  --resource-group mlstudio --workspace-name aml-cust-demo
+      run: az ml model update  --name iris_model --version 2 --set tags.staging=none  --resource-group mlstudio --workspace-name aml-cust-demo
 
     - name: Register model approval (stage:none) to none
-      run: az ml model update  --name demo-model --version 2 --set tags.approval=none  --resource-group mlstudio --workspace-name aml-cust-demo
+      run: az ml model update  --name iris_model --version 2 --set tags.approval=none  --resource-group mlstudio --workspace-name aml-cust-demo
                
   staging:
     needs: build
