@@ -32,7 +32,7 @@ jobs:
     
     - name: CI (build and register mode)
       run: az ml job create -f build_pipeline.yml --resource-group mlstudio --workspace-name aml-cust-demo --stream
-      #working-directory: ./code
+      working-directory: ./code
           
     - name: Register model staging as None
       run: az ml model update  --name iris_model --version 2 --set tags.staging=none  --resource-group mlstudio --workspace-name aml-cust-demo
