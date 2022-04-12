@@ -7,7 +7,7 @@ compute: azureml:cpucluster
 jobs:
   build_job:
     type: component
-    component: azureml:build:1
+    component: azureml:build_ml_model@latest
     #component: file:./components/approval_cmp.yml
     #component: file:./components/build_cmp.yml
 

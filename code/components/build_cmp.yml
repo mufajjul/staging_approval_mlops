@@ -1,8 +1,8 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
 type: command
 
-name: build
-display_name: build
+name: build_ml_model
+display_name: buildModel
 version: 1
 
 code:
