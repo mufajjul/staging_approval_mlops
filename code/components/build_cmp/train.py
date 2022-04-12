@@ -121,9 +121,9 @@ def main(args):
     
     run.upload_file(model_file_name, os.path.join('./outputs', model_file_name))
     
-    model = run.register_model(model_name=model_file_name,
+    model = run.register_model(model_name='iris_model',
                            tags={},
-                           model_path='iris_model.pkl')
+                           model_path=model_file_name)
     print(model.name, model.id, model.version, sep='\t')
     
 def parse_args():
