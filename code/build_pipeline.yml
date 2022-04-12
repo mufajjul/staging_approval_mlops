@@ -8,7 +8,7 @@ jobs:
   build_job:
     type: component
     #component: file:./components/approval_cmp.yml
-    component: file:./components/build_cmp.yml
+    component: file:./code/components/build_cmp.yml
 
 #  register_model:
 #    command: az ml az ml model create --file outputs/model.yml --resource-group mlstudio --workspace-name aml-cust-demo
