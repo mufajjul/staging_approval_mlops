@@ -1,10 +1,10 @@
 
-name: staging and approval-P and G
+name: staging and approval P&G
 on:
   pull_request:
     types: [ closed]
-    paths:
-    - cli/setup.sh   
+    #paths:
+    #- cli/setup.sh   
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -27,7 +27,7 @@ jobs:
         
     - name: setup
       run: bash setup.sh
-      working-directory: cli
+      working-directory: ./cli
       continue-on-error: true
     
     - name: CI (build and register mode)
