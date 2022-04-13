@@ -2,7 +2,7 @@ $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
 description: "Basic Pipeline Job with 3 Hello World components"
 
-compute: azureml:cpu-cluster
+compute: azureml:cpucluster
 
 jobs:
   #training_job:
@@ -11,12 +11,12 @@ jobs:
   #  component: file:./components/train_cmp.yml
 
   staging_job:
-    type: component
+    type: command
     #component: file:./components/approval_cmp.yml
     component: file:./components/test_cmp.yml
 
   deploy_job:
-    type: component
+    type: command
     #component: file:./components/approval_cmp.yml
     component: file:./components/deploy_cmp.yml
 
