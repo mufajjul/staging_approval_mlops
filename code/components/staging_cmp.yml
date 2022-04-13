@@ -5,8 +5,7 @@ name: staging
 display_name: staging
 version: 1
 
-code:
-  local_path: ./staging_cmp
+code: ./staging_cmp
 
 environment: 
   conda_file: ./staging_cmp/environment.yml
