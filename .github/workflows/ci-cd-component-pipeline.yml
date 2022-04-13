@@ -60,7 +60,7 @@ jobs:
         continue-on-error: true
     
       - name: CI (build and register mode)
-        run: az ml job create -f release_pipeline.yml --resource-group mlstudio --workspace-name aml-cust-demo --stream
+        run: az ml job create -f release_pipeline_staging.yml --resource-group mlstudio --workspace-name aml-cust-demo --stream
         working-directory: ./code
           
       - name: Register model staging as None
