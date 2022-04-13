@@ -53,19 +53,22 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - name: setup
+        run: bash setup.sh
+        working-directory: ./cli
+        continue-on-error: true
+    
+      - name: CI (build and register mode)
+        run: az ml job create -f staging_pipeline.yml --resource-group mlstudio --workspace-name aml-cust-demo --stream
+        working-directory: ./code
+          
+      - name: Register model staging as None
+        run: az ml model update  --name iris_model --label=latest  --set tags.staging=staging  --resource-group mlstudio --workspace-name aml-cust-demo
 
-      - name: Azure CLI script
-        uses: azure/CLI@v1
-        with:
-          azcliversion: 2.30.0
-          inlineScript: |
-            az account show
-            az storage -h
-            #az extension remove -n azure-cli-ml
-            az extension add -n ml -y
-            az ml -h
-            az ml model update  --name demo-model --version 2 --set tags.staging=staging  --resource-group mlstudio --workspace-name aml-cust-demo
-            az ml model update  --name demo-model --version 2 --set tags.approval=approved  --resource-group mlstudio --workspace-name aml-cust-demo
+      - name: Register model approval (stage:none) to none
+        run: az ml model update  --name iris_model --label=latest  --set tags.approval=approved  --resource-group mlstudio --workspace-name aml-cust-demo
+       
   deploy:
     needs: staging
     environment:
