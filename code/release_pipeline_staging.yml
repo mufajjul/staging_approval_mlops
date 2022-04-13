@@ -13,12 +13,12 @@ jobs:
   staging_job:
     type: command
     #component: file:./components/approval_cmp.yml
-    component: file:./components/test_cmp.yml
+    component: file:./components/staging_cmp.yml
 
-  deploy_job:
-    type: command
-    #component: file:./components/approval_cmp.yml
-    component: file:./components/deploy_cmp.yml
+#  deploy_job:
+#    type: command
+#    #component: file:./components/approval_cmp.yml
+#    component: file:./components/deploy_cmp.yml
 
  # approval_job:
  #   type: component
