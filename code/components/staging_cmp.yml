@@ -1,7 +1,6 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
 type: command
 
-
 name: staging
 display_name: staging
 version: 1
