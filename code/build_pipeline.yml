@@ -2,7 +2,6 @@ $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
 description: "Staging and approval, build process"
 
-
 compute: azureml:cpucluster
 
 jobs:
