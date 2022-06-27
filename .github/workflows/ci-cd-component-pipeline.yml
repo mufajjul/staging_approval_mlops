@@ -31,14 +31,14 @@ jobs:
       continue-on-error: true
     
     - name: CI (build and register mode)
-      run: az ml job create -f build_pipeline.yml --resource-group mlstudio --workspace-name aml-cust-demo --stream
+      run: az ml job create -f build_pipeline.yml --resource-group asset-stages --workspace-name asset-stages-demo --stream
       working-directory: ./code
           
     - name: Register model staging as None
-      run: az ml model update  --name iris_model --label=latest  --set tags.staging=none  --resource-group mlstudio --workspace-name aml-cust-demo
+      run: az ml model update  --name iris_model --label=latest  --set tags.staging=none  --resource-group asset-stages --workspace-name asset-stages-demo
 
     - name: Register model approval (stage:none) to none
-      run: az ml model update  --name iris_model --label=latest  --set tags.approval=none  --resource-group mlstudio --workspace-name aml-cust-demo
+      run: az ml model update  --name iris_model --label=latest  --set tags.approval=none  --resource-group asset-stages --workspace-name asset-stages-demo
                
   staging:
     needs: build
@@ -60,14 +60,14 @@ jobs:
         continue-on-error: true
     
 #      - name: CI (build and register mode)
-#        run: az ml job create -f release_pipeline_staging.yml --resource-group mlstudio --workspace-name aml-cust-demo --stream
+#        run: az ml job create -f release_pipeline_staging.yml --resource-group asset-stages --workspace-name asset-stages-demo --stream
 #        working-directory: ./code
           
       - name: Register model stage to staging
-        run: az ml model update  --name iris_model --label=latest  --set tags.staging=staging  --resource-group mlstudio --workspace-name aml-cust-demo
+        run: az ml model update  --name iris_model --label=latest  --set tags.staging=staging  --resource-group asset-stages --workspace-name asset-stages-demo
 
       - name: Register model approval (stage:staging) to approved
-        run: az ml model update  --name iris_model --label=latest  --set tags.approval=approved  --resource-group mlstudio --workspace-name aml-cust-demo
+        run: az ml model update  --name iris_model --label=latest  --set tags.approval=approved  --resource-group asset-stages --workspace-name asset-stages-demo
        
   deploy:
     needs: staging
@@ -89,12 +89,12 @@ jobs:
       continue-on-error: true
 
 #      - name: CI (build and register mode)
-#        run: az ml job create -f release_pipeline_staging.yml --resource-group mlstudio --workspace-name aml-cust-demo --stream
+#        run: az ml job create -f release_pipeline_staging.yml --resource-group asset-stages --workspace-name asset-stages-demo --stream
 #        working-directory: ./code
           
     - name: Register model stage to prod
-      run: az ml model update  --name iris_model --label=latest  --set tags.staging=prod  --resource-group mlstudio --workspace-name aml-cust-demo
+      run: az ml model update  --name iris_model --label=latest  --set tags.staging=prod  --resource-group asset-stages --workspace-name asset-stages-demo
 
     - name: Register model approval (stage:prod) to approved
-      run: az ml model update  --name iris_model --label=latest  --set tags.approval=prod  --resource-group mlstudio --workspace-name aml-cust-demo
+      run: az ml model update  --name iris_model --label=latest  --set tags.approval=prod  --resource-group asset-stages --workspace-name asset-stages-demo
  
