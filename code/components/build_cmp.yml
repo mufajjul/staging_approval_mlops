@@ -1,0 +1,16 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+
+name: build_ml_model
+display_name: buildModel
+version: 1
+
+code: ./build_cmp
+
+environment: 
+  conda_file: ./build_cmp/environment.yml
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.0.3-cudnn8-ubuntu18.04:20210405.v1
+
+command: >-
+  python train.py
+

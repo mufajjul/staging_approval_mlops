@@ -1,0 +1,100 @@
+
+name: staging and approval P&G
+on:
+  pull_request:
+    types: [ closed]
+    #paths:
+    #- cli/setup.sh   
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "greet"
+  build:
+    name: Build
+    #if: github.event_name == 'push' && contains(toJson(github.event.commits), '***NO_CI***') == false && contains(toJson(github.event.commits), '[ci skip]') == false && contains(toJson(github.event.commits), '[skip ci]') == false
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    # Runs a single command using the runners shell
+    - name: Start Pipeline
+      run: echo "Hello ${{ github.event.inputs.name }}"
+      
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: setup
+      run: bash setup.sh
+      working-directory: ./cli
+      continue-on-error: true
+    
+    - name: CI (build and register mode)
+      run: az ml job create -f build_pipeline.yml --resource-group asset-stages --workspace-name asset-stages-demo --stream
+      working-directory: ./code
+          
+    - name: Register model staging as None
+      run: az ml model update  --name iris_model --label=latest  --set tags.staging=none  --resource-group asset-stages --workspace-name asset-stages-demo
+
+    - name: Register model approval (stage:none) to none
+      run: az ml model update  --name iris_model --label=latest  --set tags.approval=none  --resource-group asset-stages --workspace-name asset-stages-demo
+               
+  staging:
+    needs: build
+    name: Deploy to staging
+    environment:
+        name: staging
+        #url: ${{ steps.deploy_staging.outputs.webapp-url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - name: setup
+        run: bash setup.sh
+        working-directory: ./cli
+        continue-on-error: true
+    
+#      - name: CI (build and register mode)
+#        run: az ml job create -f release_pipeline_staging.yml --resource-group asset-stages --workspace-name asset-stages-demo --stream
+#        working-directory: ./code
+          
+      - name: Register model stage to staging
+        run: az ml model update  --name iris_model --label=latest  --set tags.staging=staging  --resource-group asset-stages --workspace-name asset-stages-demo
+
+      - name: Register model approval (stage:staging) to approved
+        run: az ml model update  --name iris_model --label=latest  --set tags.approval=approved  --resource-group asset-stages --workspace-name asset-stages-demo
+       
+  deploy:
+    needs: staging
+    environment:
+      name: production
+      #url: ${{ steps.deploy_production.outputs.webapp-url }}
+    name: Deploy to production
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: setup
+      run: bash setup.sh
+      working-directory: ./cli
+      continue-on-error: true
+
+#      - name: CI (build and register mode)
+#        run: az ml job create -f release_pipeline_staging.yml --resource-group asset-stages --workspace-name asset-stages-demo --stream
+#        working-directory: ./code
+          
+    - name: Register model stage to prod
+      run: az ml model update  --name iris_model --label=latest  --set tags.staging=prod  --resource-group asset-stages --workspace-name asset-stages-demo
+
+    - name: Register model approval (stage:prod) to approved
+      run: az ml model update  --name iris_model --label=latest  --set tags.approval=prod  --resource-group asset-stages --workspace-name asset-stages-demo
+ 

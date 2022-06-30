@@ -1,0 +1,16 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+
+
+name: staging
+display_name: staging
+version: 1
+
+code: ./staging_cmp
+
+environment: 
+  conda_file: ./staging_cmp/environment.yml
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.0.3-cudnn8-ubuntu18.04:20210405.v1
+
+command: >-
+  python test.py
