@@ -15,8 +15,6 @@ from azureml.core import Dataset, Run
 run = Run.get_context()
 
 
-
-//confusion matrix function
 def log_confusion_matrix_image(cm, labels, normalize=False, log_name='confusion_matrix', title='Confusion matrix', cmap=plt.cm.Blues):
     '''
     This function prints and plots the confusion matrix.
@@ -115,10 +113,19 @@ def main(args):
     log_confusion_matrix(cm, labels)
     
     # files saved in the "outputs" folder are automatically uploaded into run history
-    model_file_name = "model.pkl"
+    model_file_name = "iris_model.pkl"
     joblib.dump(svm_model, os.path.join('outputs', model_file_name))
 
 
+    # Register the model     
+    
+    run.upload_file(model_file_name, os.path.join('./outputs', model_file_name))
+    
+    model = run.register_model(model_name='iris_model',
+                           tags={},
+                           model_path=model_file_name)
+    print(model.name, model.id, model.version, sep='\t')
+    
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--kernel', type=str, default='rbf', help='Kernel type to be used in the algorithm')

@@ -1,165 +1,185 @@
+# AML Asset Stages Lifecycle
+
+# Motivation
+
+1. As an ML Professional I want to be able to indicate which of the assets (model, dataset, environment and components) in the aml registry are in draft vs ready for review/approval (out of scope for current spec) to be moved to production. When an asset is ready to go to production, I should just be able to update the state/status and some other business process kicks off that I don’t need to know about in depth.
+
+3. As a model/asset risk officer , when an ML professional marks a asset as ready for review I should be alerted and be able to drill into to review and approve.  For example, for a model, this would include being able to determine which project templates (if any) were used, which base models or features were used, and have full access to the code, the model, the data and the explanations / interpretability details that are available to facilitate Model Approval tracking. Further, I would like to be able to design a workflow which enforces my policies / validates my requirements have been met.
+  
+
+# Benefits
+
+This feature provides the following benefits:
+
+- Provide etter governance around the AML assets for enterprises.
+- Use pre-build asset lifecycle to facilitate MLOPs deployment.
+- Define custom stages for business specific lifecycle.
+- Track stages change/lineage for assets
+- Stage change event driven business specific workflow (logic apps, etc)
+- Policy based lifecycle stages flow enforcement
+- Use MlFlow SDK/Client extension to manage the asset stages (current supports model with pre-built stages)
+- Advance access control on assets based on the lifecycle stage.
+
+## Asset Stages Lifecycle
+
+An asset lifecycle consists of a series of stages it undertakes during the MLOPs process to ensure that flow of execution/operation is perform in a certain order, be able to track the historical order of changes/updates and be able to perform various business processes or validation on change of stage, as well as to meet various regulatory and compliance requirements (see below).
+
+<img width="1624" alt="assets-lifecycle" src="https://user-images.githubusercontent.com/3224778/163355561-89f4ff6f-ea7a-46ef-96a9-e2f01ad184f8.png">
+
+
+E.g, adding the property here for a model: https://docs.microsoft.com/en-us/rest/api/azureml/model-versions
+
+![](/docs/media/model-flow.png)
+
+
+## What AML Assets are in Consideration?
+
+1. Model
+2. Dataset
+3. Environment
+4. Compoment
+
+
+# Asset Staging
+
+**Workspace and Registry will have asset stages.**
+
+**Asset stages will apply to Single or Multiple (i.e.,Dev, Test and Prod) Workspaces.**
+
+## Natively Supported Asset Lifecycle
+
+AML to support None, Staging, Production, Archived to correspond with MLflow specification for Stages. In addition a special Stage called “Unregistered” is supported on which policies can be defined.
+
+Unregistered == ["Unregistered Stage" <- not the real name]
+Registered == [None, Staging, Production, Archived] == MLflow stages
+
+There will be default policies enforcing only forward transitions to Stages. Customers can disable the default policies, for example, in order to move from Production to Staging if required. If required, customer should be able to create custom policies on any supported Stages.
+
+The Four transitional stages are: None, Staging, Production and Archive.
+
+0. **Unregistered(Special)**
+   
+   - Any transition from Unregistered will not be allowed. Customers will only be able to create/register other assets using Unregistered as a source. Only way to get rid of unregistered asset is to delete that asset.
+   - Transition from [None, Staging, Prod, Archive] to Unregistered is not allowed.
+   - Users can’t create asset with the Stage “Unregistered”
+   - Only the AML system can auto create a model with Stage “Unregistered”. By definition, these can’t be versioned.   - When an asset in Unregistered stage is Registered by the customer, the stage is updated to None as part of the registration.   
+1. **None**
+   
+   - c An asset in a "None" stage is the beginning of the lifecycle. This is considered to be a production ready asset.
+   - An asset can be moved to the next stage (with optional approval process).
+2. **Staging**
+   
+   - An asset in a "Staging" stage is ready to be moved into production. Various activities can be performed on the asset in a non-prod environment.
+   - There should be an approval process for any resource moving out of Production also since it will be an impacting transition?
+3. **Production**
+   
+   - An asset in the "Production" stage is ready to be deployed in a production environment. If there is an asset (model) already in production, this would automatically be moved to archive.
+   - There should be an approval process for any resource moving out of Production also since it will be an impacting transition?
+   - 
+4. **Archive** - An asset in the "Archive" stage is the end of the lifecycle. The asset is no longer considered as production ready. Archiving will be consistent with how we archive assets in AzureML today. An archive asset is just hidden from the UI list and will be given the stage archive.
+
+# MLFlow Parity
+
+- The default Stages are quite similar to what we see in MlFlow, and this was done in
+  purpose to make sure we are inline with MlFlow.
+- MLflow transition_model_version_stage arg, which implies that transition of an asset might end up affecting all other existing versions
+
+[https://www.mlflow.org/docs/latest/python_api/mlflow.tracking.html#mlflow.tracking.MlflowClient.transition_model_version_stage](https://www.mlflow.org/docs/latest/python_api/mlflow.tracking.html#mlflow.tracking.MlflowClient.transition_model_version_stage)
+
+transition_model_version_stage(name: str, version: str, stage: str, archive_existing_versions: bool = False)
+
+We do not consider supporting archive_existing_versions by having an async API and associated complexity. This will not be a full parity with MLflow transition API but we do not want to complicate the entire set of APIs/design for this support.
+
+- ModelRegistry service already persists “Stage”
+  passed in through MLflow requests, so such existing entities should be mapped
+  to the correct Stage.
+
+
+
+## Policies
+
+Various policies are required to govern and manage the stages lifecycle.  This includes, what is the starting stage, end stage, and intermediaries, various operation that can and cannot be performed and the order it is performed.   Below is a list of candidate policies.
+
+1. An asset can transit from one state to another (direct acyclic).
+   i.e, None -> Staging,   staging -> production.
+2. An asset can only be deleted in None or Archive stage (not in Staging or Production)
+3. A deployment cannot be created if a model is in “None” or “Archive” stage.  (Applicable to Managed Endpoint).
+4. A risk owner(s) or pre-selected users can only approve an asset transition (if approval is enabled).  (RBAC)
+
+Enforceable Transition Patterns
+
+Only using the AML registry for all assets (preferred)
+
+•Mode: Resource propagation  (asset X: v1 – stage: None -> asset X:v1 - stage: Staging -> asset X: v1 - stage: production -> asset X: v1: Archive)  (a single version of asset, but updated stage property depending on where it is in the lifecycle).
+
+•Mode: Resource evolution (retraining model) (asset X: v1 – stage: None -> asset X:v2 - stage: Staging -> asset X: v3 - stage: production -> asset X: v3: Archive)  (multiple versions of same asset at different stages,  and updated stage property depending on where it is in the lifecycle).
+
+**Using both workspace and AML registry**
+
+Azure policy allows used to run operations on the following properties:
+
+Microsoft.MachineLearningServices/workspaces/models/tags
+Microsoft.MachineLearningServices/workspaces/models/versions/datastoreId
+Microsoft.MachineLearningServices/workspaces/models/versions/description
+Microsoft.MachineLearningServices/workspaces/models/versions/flavors
+Microsoft.MachineLearningServices/workspaces/models/versions/isAnonymous
+Microsoft.MachineLearningServices/workspaces/models/versions/path
+Microsoft.MachineLearningServices/workspaces/models/versions/tags
+
+We need a new one for asset stages
+Microsoft.MachineLearningServices/workspaces/*/stages
+
+---
+
+---
+
+# Model Stage And Approval Lifecycle Demo
+
+In this demo we are going to demonstrate Model Stages and Approval lifecycle for event based MlOPs. We are going to use the IRIS dataset to build a classification model to illustrate the end-to-end flow. This example will use CLI V2.
+
+Here are the list of steps we are going to follow:
+
+1. How to create Azure Policies for stages and approval lifecycle
+2. How to assign policies at the resource group level
+3. Build simple AML pipeline using using components for training.
+
+<img width="1113" alt="model-asset-without-approval" src="https://user-images.githubusercontent.com/3224778/163420652-073e123a-23db-48fb-9572-da31ed72a925.png">
+
+## Policy Creation
+
+## Policy Assignment
+
+## Create Build Pipeline Using AML Component
+
+## Create Release Pipeline
+
+## GitHub Action for CI/CD Pipeline
+
+### Create Environments
+
+### Register model stage as None
+
+### Approval to Staging
+
+### Register model stage as Staging
+
+### Approval to Archive 
+
+### Register model stage as production
+
+### Trigger stage change event
+
+### Deploy
 
 
 
 
-ss# ML Ops with GitHub Actions and Azure Machine Learning
 
 
-<fsd align="center">
-  <img src="docs/images/aml.svg" height="80"/>
-  <img src="https://i.ya-webdesign.com/images/a-plus-png-2.png" alt="plus" height="40"/>
-  <img src="docs/images/actions.png" alt="Azure Machine Learning + Actions" height="80"/>
-</p>
 
-This template can be used for easily setting up a data science or machine learning project with automated training and deployment using [GitHub Actions](https://github.com/features/actions) and [Azure Machine Learning](https://docs.microsoft.com/en-us/azure/machine-learning/). For a more comprehensive version of this automated pipeline, see the [aml-template](https://github.com/Azure/aml-template) repository.
 
-# Getting started
 
-### YouTube Video
 
-Click on the image to view the video on YouTube. The video shows you the setup process, which is also described below:
-[![Azure Machine Learning GitHub Actions - Setup Guide](http://img.youtube.com/vi/bmFr0LYo_6o/maxresdefault.jpg)](http://www.youtube.com/watch?v=bmFr0LYo_6o "Azure Machine Learning GitHub Actions - Setup Guide")
 
-### 1. Prerequisites
 
-The following prerequisites are required to make this repository work:
-- Azure subscription
-- Contributor access to the Azure subscription
-- Access to [GitHub Actions](https://github.com/features/actions)
-
-If you don’t have an Azure subscription, create a free account before you begin. Try the [free or paid version of Azure Machine Learning](https://aka.ms/AMLFree) today.
-
-### 2. Create repository
-
-To get started with ML Ops, simply create a new repo based off this template, by clicking on the green "Use this template" button:
-
-<p align="center">
-  <img src="https://help.github.com/assets/images/help/repository/use-this-template-button.png" alt="GitHub Template repository" width="700"/>
-</p>
-
-### 3. Setting up the required secrets
-
-A service principal needs to be generated for authentication and getting access to your Azure subscription. We suggest adding a service principal with contributor rights to a new resource group or to the one where you have deployed your existing Azure Machine Learning workspace. Just go to the Azure Portal to find the details of your resource group or workspace. Then start the Cloud CLI or install the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) on your computer and execute the following command to generate the required credentials:
-
-```sh
-# Replace {service-principal-name}, {subscription-id} and {resource-group} with your 
-# Azure subscription id and resource group name and any name for your service principle
-az ad sp create-for-rbac --name {service-principal-name} \
-                         --role contributor \
-                         --scopes /subscriptions/{subscription-id}/resourceGroups/{resource-group} \
-                         --sdk-auth
-```
-
-This will generate the following JSON output:
-
-```sh
-{
-  "clientId": "<GUID>",
-  "clientSecret": "<GUID>",
-  "subscriptionId": "<GUID>",
-  "tenantId": "<GUID>",
-  (...)
-}
-```
-
-Add this JSON output as [a secret](https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets#creating-encrypted-secrets) with the name `AZURE_CREDENTIALS` in your GitHub repository:
-
-<p align="center">
-  <img src="docs/images/secrets.png" alt="GitHub Template repository" width="700"/>
-</p>
-
-To do so, click on the Settings tab in your repository, then click on Secrets and finally add the new secret with the name `AZURE_CREDENTIALS` to your repository.
-
-Please follow [this link](https://help.github.com/en/actions/configuring-and-managing-workflows/creating-and-storing-encrypted-secrets#creating-encrypted-secrets) for more details. 
-
-### 4. Define your workspace parameters
-
-You have to modify the parameters in the <a href="/.cloud/.azure/workspace.json">`/.cloud/.azure/workspace.json"` file</a> in your repository, so that the GitHub Actions create or connect to the desired Azure Machine Learning workspace. Just click on the link and edit the file.
-
-Please use the same value for the `resource_group` parameter that you have used when generating the azure credentials. If you already have an Azure ML Workspace under that resource group, change the `name` parameter in the JSON file to the name of your workspace, if you want the Action to create a new workspace in that resource group, pick a name for your new workspace, and assign it to the `name` parameter. You can also delete the `name` parameter, if you want the action to use the default value, which is the repository name.
-
-Once you save your changes to the file, the predefined GitHub workflow that trains and deploys a model on Azure Machine Learning gets triggered. Check the actions tab to view if your actions have successfully run.
-
-<p align="center">
-  <img src="docs/images/actions_tab.png" alt="GitHub Actions Tab" width="700"/>
-</p>
-
-### 5. Modify the code
-
-Now you can start modifying the code in the <a href="/code">`code` folder</a>, so that your model and not the provided sample model gets trained on Azure. Where required, modify the environment yaml so that the training and deployment environments will have the correct packages installed in the conda environment for your training and deployment.
-Upon pushing the changes, actions will kick off your training and deployment run. Check the actions tab to view if your actions have successfully run.
-
-Comment lines 39 to 55 in your <a href="/.github/workflows/train_deploy.yml">`"/.github/workflows/train_deploy.yml"` file</a> if you only want to train the model. Uncomment line 7 to 8, if you only want to kick off the workflow when pushing changes to the `"/code/"` file.
-
-### 6. Viewing your AML resources and runs
-
-The log outputs of your action will provide URLs for you to view the resources that have been created in AML. Alternatively, you can visit the [Machine Learning Studio](https://ml.azure.com/) to view the progress of your runs, etc. For more details, read the documentation below.
-
-# Documentation
-
-## Code structure
-
-| File/folder                   | Description                                |
-| ----------------------------- | ------------------------------------------ |
-| `code`                        | Sample data science source code that will be submitted to Azure Machine Learning to train and deploy machine learning models. |
-| `code/train`                  | Sample code that is required for training a model on Azure Machine Learning. |
-| `code/train/train.py`         | Training script that gets executed on a cluster on Azure Machine Learning. |
-| `code/train/environment.yml`  | Conda environment specification, which describes the dependencies of `train.py`. These packages will be installed inside a Docker image on the Azure Machine Learning compute cluster, when executing your `train.py`. |
-| `code/train/run_config.yml`   | YAML files, which describes the execution of your training run on Azure Machine Learning. This file also references your `environment.yml`. Please look at the comments in the file for more details. |
-| `code/deploy`                 | Sample code that is required for deploying a model on Azure Machine Learning. |
-| `code/deploy/score.py`        | Inference script that is used to build a Docker image and that gets executed within the container when you send data to the deployed model on Azure Machine Learning. |
-| `code/deploy/environment.yml` | Conda environment specification, which describes the dependencies of `score.py`. These packages will be installed inside the Docker image that will be used for deploying your model. |
-| `code/test/test.py`           | Test script that can be used for testing your deployed webservice. Add a `deploy.json` to the `.cloud/.azure` folder and add the following code `{ "test_enabled": true }` to enable tests of your webservice. Change the code according to the tests that zou would like to execute. |
-| `.cloud/.azure`               | Configuration files for the Azure Machine Learning GitHub Actions. Please visit the repositories of the respective actions and read the documentation for more details. |
-| `.github/workflows`           | Folder for GitHub workflows. The `train_deploy.yml` sample workflow shows you how your can use the Azure Machine Learning GitHub Actions to automate the machine learning process. |
-| `docs`                        | Resources for this README.                 |
-| `CODE_OF_CONDUCT.md`          | Microsoft Open Source Code of Conduct.     |
-| `LICENSE`                     | The license for the sample.                |
-| `README.md`                   | This README file.                          |
-| `SECURITY.md`                 | Microsoft Security README.                 |
-
-## Documentation of Azure Machine Learning GitHub Actions
-
-The template uses the open source Azure certified Actions listed below. Click on the links and read the README files for more details.
-- [aml-workspace](https://github.com/Azure/aml-workspace) - Connects to or creates a new workspace
-- [aml-compute](https://github.com/Azure/aml-compute) - Connects to or creates a new compute target in Azure Machine Learning
-- [aml-run](https://github.com/Azure/aml-run) - Submits a ScriptRun, an Estimator or a Pipeline to Azure Machine Learning
-- [aml-registermodel](https://github.com/Azure/aml-registermodel) - Registers a model to Azure Machine Learning
-- [aml-deploy](https://github.com/Azure/aml-deploy) - Deploys a model and creates an endpoint for the model
-
-## Known issues
-
-### Error: MissingSubscriptionRegistration
-
-Error message: 
-```sh
-Message: ***'error': ***'code': 'MissingSubscriptionRegistration', 'message': "The subscription is not registered to use namespace 'Microsoft.KeyVault'. See https://aka.ms/rps-not-found for how to register subscriptions.", 'details': [***'code': 'MissingSubscriptionRegistration', 'target': 'Microsoft.KeyVault', 'message': "The subscription is not registered to use namespace 'Microsoft.KeyVault'. See https://aka.ms/rps-not-found for how to register subscriptions
-```
-Solution:
-
-This error message appears, in case the `Azure/aml-workspace` action tries to create a new Azure Machine Learning workspace in your resource group and you have never deployed a Key Vault in the subscription before. We recommend to create an Azure Machine Learning workspace manually in the Azure Portal. Follow the [steps on this website](https://docs.microsoft.com/en-us/azure/machine-learning/tutorial-1st-experiment-sdk-setup#create-a-workspace) to create a new workspace with the desired name. After ou have successfully completed the steps, you have to make sure, that your Service Principal has access to the resource group and that the details in your <a href="/.cloud/.azure/workspace.json">`/.cloud/.azure/workspace.json"` file</a> are correct and point to the right workspace and resource group.
-
-# What is MLOps?
-
-<p align="center">
-  <img src="docs/images/ml-lifecycle.png" alt="Azure Machine Learning Lifecycle" width="700"/>
-</p>
-
-MLOps empowers data scientists and machine learning engineers to bring together their knowledge and skills to simplify the process of going from model development to release/deployment. ML Ops enables you to track, version, test, certify and reuse assets in every part of the machine learning lifecycle and provides orchestration services to streamline managing this lifecycle. This allows practitioners to automate the end to end machine Learning lifecycle to frequently update models, test new models, and continuously roll out new ML models alongside your other applications and services.
-
-This repository enables Data Scientists to focus on the training and deployment code of their machine learning project (`code` folder of this repository). Once new code is checked into the `code` folder of the master branch of this repository the GitHub workflow is triggered and open source Azure Machine Learning actions are used to automatically manage the training through to deployment phases.
-
-# Contributing
-
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
-
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
