@@ -89,7 +89,7 @@ jobs:
     
     - name: setup
       run: bash setup.sh
-      working-directory: ./deploy
+      working-directory: ./cli
       continue-on-error: true
 
 #      - name: CI (build and register mode)
@@ -103,5 +103,5 @@ jobs:
       run: az ml model update  --name iris_model --label=latest  --set tags.approved  --resource-group asset-stages --workspace-name asset-stages-demo
     
     - name: deploy endpoint 
-      run: az ml online-endpoint create  --name model-endpoint -f blue-deployment.yml --resource-group asset-stages --workspace-name asset-stages-demo
+      run: az ml online-endpoint create  --name model-endpoint -f ../deploy/blue-deployment.yml --resource-group asset-stages --workspace-name asset-stages-demo
 
