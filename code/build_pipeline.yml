@@ -1,0 +1,11 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+description: "Staging and approval, build process"
+
+compute: azureml:cpucluster
+
+jobs:
+  build_job:
+    type: command
+    component: file:./components/build_cmp.yml
+
