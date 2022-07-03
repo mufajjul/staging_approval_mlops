@@ -113,7 +113,7 @@ def main(args):
     log_confusion_matrix(cm, labels)
     
     # files saved in the "outputs" folder are automatically uploaded into run history
-    model_file_name = "iris_model.pkl"
+    model_file_name = "iris-model.pkl"
     joblib.dump(svm_model, os.path.join('outputs', model_file_name))
 
 
@@ -121,7 +121,7 @@ def main(args):
     
     run.upload_file(model_file_name, os.path.join('./outputs', model_file_name))
     
-    model = run.register_model(model_name='iris_model',
+    model = run.register_model(model_name='iris-model',
                            tags={},
                            model_path=model_file_name)
     print(model.name, model.id, model.version, sep='\t')
