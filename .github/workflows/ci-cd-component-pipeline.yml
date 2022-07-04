@@ -104,7 +104,7 @@ jobs:
     
     - name: create online endpoint
       working-directory: ./code/deploy
-      run: az ml online-endpoint create --local -n iris-demo-endpoint -f endpoint.yml  --resource-group asset-stages --workspace-name asset-stages-demo
+      run: az ml online-endpoint create -n iris-demo-endpoint -f endpoint.yml  --resource-group asset-stages --workspace-name asset-stages-demo
     
     - name: deploy a model on an endpoint
       working-directory: ./code/deploy
