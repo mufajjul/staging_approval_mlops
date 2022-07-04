@@ -104,7 +104,7 @@ jobs:
     
     - name: create online endpoint
       working-directory: ./code/deploy
-      run: az ml online-endpoint create --local -n iris-demo-endpoint -f endpoints/online/managed/sample/endpoint.yml 
+      run: az ml online-endpoint create --local -n iris-demo-endpoint -f endpoint.yml 
 
     - name: deploy a model on an endpoint
       working-directory: ./code/deploy
