@@ -71,7 +71,7 @@ jobs:
         run: az ml model update  --name iris-model --label=latest  --set tags.staging  --resource-group asset-stages --workspace-name asset-stages-demo
 
       - name: Register model approval (stage:staging) to approved
-        run: az ml model update  --name iris-model --label=latest  --set tags.approved  --resource-group asset-stages --workspace-name asset-stages-demo
+        run: az ml model update  --name iris-model --label=latest  --set tags.approval=approved  --resource-group asset-stages --workspace-name asset-stages-demo
        
   deploy:
     needs: staging
@@ -100,7 +100,7 @@ jobs:
       run: az ml model update  --name iris-model --label=latest  --set tags.prod  --resource-group asset-stages --workspace-name asset-stages-demo
 
     - name: Register model approval (stage:prod) to approved
-      run: az ml model update  --name iris-model --label=latest  --set tags.approved  --resource-group asset-stages --workspace-name asset-stages-demo
+      run: az ml model update  --name iris-model --label=latest  --set tags.approval=approved  --resource-group asset-stages --workspace-name asset-stages-demo
     
     - name: create online endpoint
       working-directory: ./code/deploy
