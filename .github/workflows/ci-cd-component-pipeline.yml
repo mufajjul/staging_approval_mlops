@@ -103,8 +103,14 @@ jobs:
       run: az ml model update  --name iris-model --label=latest  --set tags.approval=approved  --resource-group asset-stages --workspace-name asset-stages-demo
     
     - name: create online endpoint
+      id: onlinedeployment
       working-directory: ./code/deploy
       run: az ml online-endpoint create -n iris-demo-endpoint -f endpoint.yml  --resource-group asset-stages --workspace-name asset-stages-demo
+      continue-on-error: true
+
+#    - name: Check on failures
+#      if: "!contains(steps.onlinedeployment.outcome, 'Endpoint already exists')"
+#      run: exit 1
     
     - name: deploy a model on an endpoint
       working-directory: ./code/deploy
