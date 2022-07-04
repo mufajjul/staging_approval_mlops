@@ -1,8 +1,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
 name: blue
 endpoint_name: blue-demo-deployment
-model:
-    name: azureml:iris-model@latet
+model: azureml:iris-model@latest
 code_configuration:
   code: ./score
   scoring_script: score.py

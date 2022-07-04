@@ -39,7 +39,7 @@ jobs:
       working-directory: ./code
           
     - name: Register model staging as None
-      run: az ml model update  --name iris_model --label=latest  --set tags.none --resource-group asset-stages --workspace-name asset-stages-demo
+      run: az ml model update  --name iris-model --label=latest  --set tags.none --resource-group asset-stages --workspace-name asset-stages-demo
 
     #- name: Register model approval (stage:none) to none
     #  run: az ml model update  --name iris_model --label=latest  --set tags.approval=none  --resource-group asset-stages --workspace-name asset-stages-demo
@@ -68,10 +68,10 @@ jobs:
 #        working-directory: ./code
           
       - name: Register model stage to staging
-        run: az ml model update  --name iris_model --label=latest  --set tags.staging  --resource-group asset-stages --workspace-name asset-stages-demo
+        run: az ml model update  --name iris-model --label=latest  --set tags.staging  --resource-group asset-stages --workspace-name asset-stages-demo
 
       - name: Register model approval (stage:staging) to approved
-        run: az ml model update  --name iris_model --label=latest  --set tags.approved  --resource-group asset-stages --workspace-name asset-stages-demo
+        run: az ml model update  --name iris-model --label=latest  --set tags.approved  --resource-group asset-stages --workspace-name asset-stages-demo
        
   deploy:
     needs: staging
@@ -97,12 +97,15 @@ jobs:
 #        working-directory: ./code
           
     - name: Register model stage to prod
-      run: az ml model update  --name iris_model --label=latest  --set tags.prod  --resource-group asset-stages --workspace-name asset-stages-demo
+      run: az ml model update  --name iris-model --label=latest  --set tags.prod  --resource-group asset-stages --workspace-name asset-stages-demo
 
     - name: Register model approval (stage:prod) to approved
-      run: az ml model update  --name iris_model --label=latest  --set tags.approved  --resource-group asset-stages --workspace-name asset-stages-demo
+      run: az ml model update  --name iris-model --label=latest  --set tags.approved  --resource-group asset-stages --workspace-name asset-stages-demo
     
-    - name: deploy endpoint
+    - name: create online endpoint
       working-directory: ./code/deploy
-      run: az ml online-endpoint create  --name model-endpoint -f blue-deployment.yml --resource-group asset-stages --workspace-name asset-stages-demo
+      run: az ml online-endpoint create --local -n $ENDPOINT_NAME -f endpoints/online/managed/sample/endpoint.yml 
 
+    - name: deploy a model on an endpoint
+      working-directory: ./code/deploy
+      run: az ml online-deployment create -n iris-deployment --endpoint iris-demo-endpoint -f blue-deployment.yml
