@@ -1,5 +1,5 @@
 
-name: staging and approval
+name: Staging and Approval MlOPs 
 env:
   rg: "asset-stages"
   ws: "asset-stages-demo"
@@ -12,7 +12,6 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "greet"
   build:
     name: Build
     #if: github.event_name == 'push' && contains(toJson(github.event.commits), '***NO_CI***') == false && contains(toJson(github.event.commits), '[ci skip]') == false && contains(toJson(github.event.commits), '[skip ci]') == false
@@ -22,7 +21,7 @@ jobs:
     
     # Runs a single command using the runners shell
     - name: Start Pipeline
-      run: echo "Hello ${{ github.event.inputs.name }}"
+      run: echo "Start Pipeline ${{ github.event.inputs.name }}"
       
     - name: Azure Login
       uses: azure/login@v1
@@ -35,14 +34,11 @@ jobs:
       continue-on-error: true
     
     - name: CI (build and register mode)
-      run: az ml job create -f build_pipeline.yml --resource-group asset-stages --workspace-name asset-stages-demo --stream
+      run: az ml job create -f build_pipeline.yml --resource-group $rg --workspace-name $ws --stream
       working-directory: ./code
           
     - name: Register model staging as None
-      run: az ml model update  --name iris-model --label=latest  --set tags.none --resource-group asset-stages --workspace-name asset-stages-demo
-
-    #- name: Register model approval (stage:none) to none
-    #  run: az ml model update  --name iris_model --label=latest  --set tags.approval=none  --resource-group asset-stages --workspace-name asset-stages-demo
+      run: az ml model update  --name iris-model --label=latest  --set tags.none --resource-group $rg --workspace-name $ws
                
   staging:
     needs: build
@@ -62,16 +58,12 @@ jobs:
         run: bash setup.sh
         working-directory: ./cli
         continue-on-error: true
-    
-#      - name: CI (build and register mode)
-#        run: az ml job create -f release_pipeline_staging.yml --resource-group asset-stages --workspace-name asset-stages-demo --stream
-#        working-directory: ./code
-          
+              
       - name: Register model stage to staging
-        run: az ml model update  --name iris-model --label=latest  --set tags.staging  --resource-group asset-stages --workspace-name asset-stages-demo
+        run: az ml model update  --name iris-model --label=latest  --set tags.staging  --resource-group $rg --workspace-name $ws
 
       - name: Register model approval (stage:staging) to approved
-        run: az ml model update  --name iris-model --label=latest  --set tags.approval=approved  --resource-group asset-stages --workspace-name asset-stages-demo
+        run: az ml model update  --name iris-model --label=latest  --set tags.approval=staging-approved  --resource-group $rg --workspace-name $ws
        
   deploy:
     needs: staging
@@ -97,15 +89,15 @@ jobs:
 #        working-directory: ./code
           
     - name: Register model stage to prod
-      run: az ml model update  --name iris-model --label=latest  --set tags.prod  --resource-group asset-stages --workspace-name asset-stages-demo
+      run: az ml model update  --name iris-model --label=latest  --set tags.prod  --resource-group $rg --workspace-name $ws
 
     - name: Register model approval (stage:prod) to approved
-      run: az ml model update  --name iris-model --label=latest  --set tags.approval=approved  --resource-group asset-stages --workspace-name asset-stages-demo
+      run: az ml model update  --name iris-model --label=latest  --set tags.approval=prod-approved --resource-group $rg --workspace-name $ws
     
     - name: create online endpoint
       id: onlinedeployment
       working-directory: ./code/deploy
-      run: az ml online-endpoint create -n iris-demo-endpoint -f endpoint.yml  --resource-group asset-stages --workspace-name asset-stages-demo
+      run: az ml online-endpoint create -n iris-demo-endpoint -f endpoint.yml --resource-group $rg --workspace-name $ws
       continue-on-error: true
 
 #    - name: Check on failures
@@ -114,4 +106,4 @@ jobs:
     
     - name: deploy a model on an endpoint
       working-directory: ./code/deploy
-      run: az ml online-deployment create -n iris-deployment --endpoint iris-demo-endpoint -f blue-deployment.yml --resource-group asset-stages --workspace-name asset-stages-demo
+      run: az ml online-deployment create -n iris-deployment --endpoint iris-demo-endpoint -f blue-deployment.yml --resource-group $rg --workspace-name $ws
