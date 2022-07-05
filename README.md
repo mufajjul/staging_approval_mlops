@@ -1,4 +1,4 @@
-# AML Asset Stages Lifecycle
+# AML Asset (Model) Stages and Approval MlOps 
 
 # Motivation
 
@@ -24,7 +24,7 @@ This feature provides the following benefits:
 
 An asset lifecycle consists of a series of stages it undertakes during the MLOPs process to ensure that flow of execution/operation is perform in a certain order, be able to track the historical order of changes/updates and be able to perform various business processes or validation on change of stage, as well as to meet various regulatory and compliance requirements (see below).
 
-<img width="1624" alt="assets-lifecycle" src="https://user-images.githubusercontent.com/3224778/163355561-89f4ff6f-ea7a-46ef-96a9-e2f01ad184f8.png">
+![Screenshot 2022-07-05 at 11 48 43](https://user-images.githubusercontent.com/3224778/177311712-90d5b3bc-f7a2-4781-b440-cb64a5711a84.png)
 
 
 E.g, adding the property here for a model: https://docs.microsoft.com/en-us/rest/api/azureml/model-versions
@@ -86,13 +86,8 @@ The Four transitional stages are: None, Staging, Production and Archive.
 
 [https://www.mlflow.org/docs/latest/python_api/mlflow.tracking.html#mlflow.tracking.MlflowClient.transition_model_version_stage](https://www.mlflow.org/docs/latest/python_api/mlflow.tracking.html#mlflow.tracking.MlflowClient.transition_model_version_stage)
 
-transition_model_version_stage(name: str, version: str, stage: str, archive_existing_versions: bool = False)
 
-We do not consider supporting archive_existing_versions by having an async API and associated complexity. This will not be a full parity with MLflow transition API but we do not want to complicate the entire set of APIs/design for this support.
 
-- ModelRegistry service already persists “Stage”
-  passed in through MLflow requests, so such existing entities should be mapped
-  to the correct Stage.
 
 
 
@@ -147,9 +142,84 @@ Here are the list of steps we are going to follow:
 
 ## Policy Creation
 
+The Stages workflow is and and business specific logic can be enfored using Azure policy. In this example, we are going to create a policy that enforces the correct order of stage transition. I.e, we move from Dev -> Test -> Production, and shoudl not allow Dev != prod
+
+Step 1:  Select Azure policy from portal.azure.com
+
+<img width="1267" alt="Screenshot 2022-07-05 at 12 16 22" src="https://user-images.githubusercontent.com/3224778/177315882-8d1b82e0-8d3e-4f37-bd27-6de322ae8d54.png">
+
+Step 2: Click on policy definition on the left, and select "+Policy definition". This will open up the oplicy authoring dialouge. 
+
+<img width="1647" alt="Screenshot 2022-07-05 at 12 20 19" src="https://user-images.githubusercontent.com/3224778/177316439-5cd90ecd-7ecd-4b3f-bcc0-bc61e0f9399a.png">
+
+Please select the definition location, which would be the subscription you would like to use. Choose "existing category" and select "Maching learning".  By default, it provides a policy template. 
+
+Here is a simple example that uses Tags as the stage property to apply policy. 
+
+````json
+
+{
+  "mode": "All",
+  "policyRule": {
+    "if": {
+      "allOf": [
+        {
+          "field": "type",
+          "equals": "Microsoft.MachineLearningServices/workspaces/models/versions"
+        },
+        {
+          "field": "Microsoft.MachineLearningServices/workspaces/models/versions/tags",
+          "containsKey": "none"
+        },
+        {
+          "allOf": [
+            {
+              "field": "Microsoft.MachineLearningServices/workspaces/models/versions/tags",
+              "containsKey": "[parameters('StageName1')]"
+            },
+            {
+              "field": "Microsoft.MachineLearningServices/workspaces/models/versions/tags",
+              "containsKey": "[parameters('StageName4')]"
+            }
+          ]
+        }
+      ]
+    },
+    "then": {
+      "effect": "deny"
+    }
+  },
+  "parameters": {
+    "StageName1": {
+      "type": "String",
+      "metadata": {
+        "displayName": "Stage Name 1",
+        "description": "Name of the stage, such as 'environment'"
+      }
+    },
+    "StageName4": {
+      "type": "String",
+      "metadata": {
+        "displayName": "Stage Name 4",
+        "description": "Name of the stage, such as 'environment'"
+      }
+    }
+  }
+}
+
+
+````
+
 ## Policy Assignment
 
+Once the policy is created, the next thing to do is assign the policy to a resource.  This can be done at the subscription or resource group level. 
+In this example, we are going to do it at the resource group level. 
+<img width="1652" alt="Screenshot 2022-07-05 at 12 37 01" src="https://user-images.githubusercontent.com/3224778/177318950-8a103af8-bcc4-4cab-ab0c-7630d7026edf.png">
+
+
 ## Create Build Pipeline Using AML Component
+
+
 
 ## Create Release Pipeline
 
