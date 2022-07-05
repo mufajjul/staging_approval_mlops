@@ -242,22 +242,57 @@ jobs:
 
 ## GitHub Action for CI/CD Pipeline
 
-The CI/CD GitHUb action pipeline is executed based on a PR.   This will build a new model, and register it in the None stage. 
+The CI/CD GitHUb action pipeline is executed based on a PR.   
+
+![Screenshot 2022-07-05 at 17 47 24](https://user-images.githubusercontent.com/3224778/177377409-92ada32e-1741-4db9-a58f-0b0e8b4827c2.png)
+
+
+Once the pull request is completed, this will start the build process. 
+
+![Screenshot 2022-07-05 at 17 47 49](https://user-images.githubusercontent.com/3224778/177377520-e27319db-4a22-4e51-a3d3-cda56db462c4.png)
+
+Azure Devops build process runs the experiment in AML. 
+
+![Screenshot 2022-07-05 at 17 52 52](https://user-images.githubusercontent.com/3224778/177378139-22b37440-f21f-4ebb-bf84-a6a0ac41da8b.png)
 
 
 ### Register model stage as None
 
+Once the Job is completed, the model is registered in AML model registry, with the stage None (denoted by a tag). 
+
+
+![Screenshot 2022-07-05 at 17 55 10](https://user-images.githubusercontent.com/3224778/177378444-4a5ae9ca-c54d-4019-9d6f-0c0d7d690137.png)
+
+
+
 ### Approval to Staging
+
+![Screenshot 2022-07-05 at 17 55 50](https://user-images.githubusercontent.com/3224778/177378565-361f0153-a040-4024-86ac-7f90b980b91f.png)
 
 ### Register model stage as Staging
 
-### Approval to Archive 
+![Screenshot 2022-07-05 at 17 57 43](https://user-images.githubusercontent.com/3224778/177378867-ed70d8fe-40c6-45bc-94da-16caaadf50a1.png)
+
+
+### Approval to Production
+
+![Screenshot 2022-07-05 at 17 58 37](https://user-images.githubusercontent.com/3224778/177378984-b91342b6-f694-4305-9389-6c6d950bb4db.png)
+
+
+### Run deployment 
+
+
+![Screenshot 2022-07-05 at 18 05 16](https://user-images.githubusercontent.com/3224778/177380134-351003f8-65e3-422b-bc9e-8583a265a793.png)
+
 
 ### Register model stage as production
 
-### Trigger stage change event
 
-### Deploy
+![Screenshot 2022-07-05 at 18 02 14](https://user-images.githubusercontent.com/3224778/177379562-af4ad98a-8517-4c47-b5e3-64bd721e2765.png)
+
+### Deploy the model to realtime managed endpoint 
+
+![Screenshot 2022-07-05 at 18 01 30](https://user-images.githubusercontent.com/3224778/177379444-035e1649-d2e9-40ba-b934-a576cc191d8b.png)
 
 
 
