@@ -5,10 +5,6 @@ description: "Basic Pipeline Job with 3 Hello World components"
 compute: azureml:cpucluster
 
 jobs:
-  #training_job:
-  #  type: component
-    #component: file:./components/approval_cmp.yml
-  #  component: file:./components/train_cmp.yml
 
   staging_job:
     type: command
@@ -19,13 +15,3 @@ jobs:
     type: command
     #component: file:./components/approval_cmp.yml
     component: file:./components/deploy_cmp.yml
-
- # approval_job:
- #   type: component
- #   component: file:./componentA.yml 
- # test_job:
- #   type: component
- #   component: file:./componentB.yml
- # deploy_job:
- #   type: component
- #   component: file:./componentC.yml
