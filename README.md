@@ -225,7 +225,7 @@ Every workspaces in the resource group will have the policy enabled.
 ## Create AML Pipeline Using AML Component
 
 
-````json 
+````json
 
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
@@ -239,7 +239,6 @@ jobs:
     component: file:./components/build_cmp.yml
 
 ````
-
 
 ## GitHub Action for CI/CD Pipeline
 
