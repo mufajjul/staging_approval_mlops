@@ -142,17 +142,17 @@ Here are the list of steps we are going to follow:
 
 ## Policy Creation
 
-The Stages workflow is and and business specific logic can be enfored using Azure policy. In this example, we are going to create a policy that enforces the correct order of stage transition. I.e, we move from Dev -> Test -> Production, and shoudl not allow Dev != prod
+The Stages workflow is and and business specific logic can be enforced using Azure policy. In this example, we are going to create a policy that enforces the correct order of stage transition. I.e, we move from Dev -> Test -> Production, and should not allow Dev != prod
 
 Step 1:  Select Azure policy from portal.azure.com
 
 <img width="1267" alt="Screenshot 2022-07-05 at 12 16 22" src="https://user-images.githubusercontent.com/3224778/177315882-8d1b82e0-8d3e-4f37-bd27-6de322ae8d54.png">
 
-Step 2: Click on policy definition on the left, and select "+Policy definition". This will open up the oplicy authoring dialouge. 
+Step 2: Click on policy definition on the left, and select "+Policy definition". This will open up the policy authoring dialog. 
 
 <img width="1647" alt="Screenshot 2022-07-05 at 12 20 19" src="https://user-images.githubusercontent.com/3224778/177316439-5cd90ecd-7ecd-4b3f-bcc0-bc61e0f9399a.png">
 
-Please select the definition location, which would be the subscription you would like to use. Choose "existing category" and select "Maching learning".  By default, it provides a policy template. 
+Please select the definition location, which would be the subscription you would like to use. Choose "existing category" and select "Machine learning".  By default, it provides a policy template. 
 
 Here is a simple example that uses Tags as the stage property to apply policy. 
 
@@ -213,19 +213,38 @@ Here is a simple example that uses Tags as the stage property to apply policy.
 ## Policy Assignment
 
 Once the policy is created, the next thing to do is assign the policy to a resource.  This can be done at the subscription or resource group level. 
+
 In this example, we are going to do it at the resource group level. 
+
 <img width="1652" alt="Screenshot 2022-07-05 at 12 37 01" src="https://user-images.githubusercontent.com/3224778/177318950-8a103af8-bcc4-4cab-ab0c-7630d7026edf.png">
 
 
-## Create Build Pipeline Using AML Component
+Every workspaces in the resource group will have the policy enabled. 
 
 
+## Create AML Pipeline Using AML Component
 
-## Create Release Pipeline
+
+````json 
+
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+description: "Staging and approval, build process"
+
+compute: azureml:cpucluster
+
+jobs:
+  build_job:
+    type: command
+    component: file:./components/build_cmp.yml
+
+````
+
 
 ## GitHub Action for CI/CD Pipeline
 
-### Create Environments
+The CI/CD GitHUb action pipeline is executed based on a PR.   This will build a new model, and register it in the None stage. 
+
 
 ### Register model stage as None
 
