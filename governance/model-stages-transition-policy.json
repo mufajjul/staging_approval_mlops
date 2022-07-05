@@ -1,0 +1,48 @@
+{
+    "mode": "All",
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.MachineLearningServices/workspaces/models/versions"
+          },
+          {
+            "field": "Microsoft.MachineLearningServices/workspaces/models/versions/tags",
+            "containsKey": "none"
+          },
+          {
+            "allOf": [
+              {
+                "field": "Microsoft.MachineLearningServices/workspaces/models/versions/tags",
+                "containsKey": "[parameters('StageName1')]"
+              },
+              {
+                "field": "Microsoft.MachineLearningServices/workspaces/models/versions/tags",
+                "containsKey": "[parameters('StageName4')]"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    },
+    "parameters": {
+      "StageName1": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Stage Name 1",
+          "description": "Name of the stage, such as 'environment'"
+        }
+      },
+      "StageName4": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Stage Name 4",
+          "description": "Name of the stage, such as 'environment'"
+        }
+      }
+    }
+  }
